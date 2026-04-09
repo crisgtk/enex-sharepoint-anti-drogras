@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "enex-anti-drogas-spfx-client-side-solution",
+    "id": "6b135cf6-7068-4cae-8ce3-cc71049354da",
+    "version": "1.0.0.1",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.19.0"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "enex-anti-drogas-spfx description"
+      },
+      "longDescription": {
+        "default": "enex-anti-drogas-spfx description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "enex-anti-drogas-spfx Feature",
+        "description": "The feature that activates elements of the enex-anti-drogas-spfx solution.",
+        "id": "821541de-c198-4336-b3e4-1ac897b92383",
+        "version": "1.0.0.1"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/enex-anti-drogas-spfx.sppkg"
+  }
+}
