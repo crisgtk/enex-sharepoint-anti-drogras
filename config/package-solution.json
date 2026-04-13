@@ -3,7 +3,7 @@
   "solution": {
     "name": "enex-anti-drogas-spfx-client-side-solution",
     "id": "6b135cf6-7068-4cae-8ce3-cc71049354da",
-    "version": "1.0.0.1",
+    "version": "1.0.0.2",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
@@ -30,7 +30,7 @@
         "title": "enex-anti-drogas-spfx Feature",
         "description": "The feature that activates elements of the enex-anti-drogas-spfx solution.",
         "id": "821541de-c198-4336-b3e4-1ac897b92383",
-        "version": "1.0.0.1"
+        "version": "1.0.0.2"
       }
     ]
   },

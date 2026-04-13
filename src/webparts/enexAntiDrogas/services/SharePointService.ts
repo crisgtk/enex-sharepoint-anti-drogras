@@ -441,8 +441,16 @@ export class SharePointService {
     public async updateTest(data: any): Promise<any> {
         try {
             const result = await this.sp.web.lists.getByTitle("EnexTestHistory").items.getById(data.id).update({
+                Title: String(data.nombre || "Sin Nombre"),
+                Rut: String(data.rut || ""),
+                Nombre: String(data.nombre || ""),
+                Empresa: String(data.empresa || ""),
+                CategoriaPersona: String(data.categoria_persona || ""),
+                Cargo: String(data.cargo || ""),
                 Resultado1: String(data.resultado_1 === 1 || data.resultado_1 === true ? "1" : "0"),
                 Resultado2: String(data.resultado_2 === 1 || data.resultado_2 === true ? "1" : "0"),
+                NumeroMaquina: String(data.numero_maquina || ""),
+                SerialEquipo: String(data.serial_equipo || ""),
                 Observaciones: data.observaciones || "",
                 UsuarioOperador: data.usuario_operador
             });

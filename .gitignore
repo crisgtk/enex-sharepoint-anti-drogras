@@ -32,3 +32,10 @@ obj
 
 # Styles Generated Code
 *.scss.ts
+
+# Misc
+.env
+.idea
+.vscode
+*.bak
+*.swp
