@@ -90,11 +90,7 @@ export class SharePointService {
                 Cargo: "Conductor"
             }));
 
-            // Add original demo users too
-            rouletteUsersSeed.push(
-                { Title: "Carlos Ruiz", Nombre: "Carlos Ruiz", Rut: "15.555.555-5", Empresa: "Enex", CategoriaPersona: "Planta", Cargo: "Operador" },
-                { Title: "Ana Belen", Nombre: "Ana Belen", Rut: "16.666.666-6", Empresa: "Enex", CategoriaPersona: "Planta", Cargo: "Administrativo" }
-            );
+
 
             await this.ensureList("EnexRouletteUsers", [
                 { name: "Nombre", type: "Text" },
