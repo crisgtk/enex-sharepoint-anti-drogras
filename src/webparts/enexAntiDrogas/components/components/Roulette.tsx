@@ -254,7 +254,7 @@ const Roulette = () => {
                     </div>
 
                     {/* Stats List */}
-                    <div className="bg-white rounded-2xl shadow-lg p-6 flex-1 overflow-hidden flex flex-col">
+                    <div className="bg-white rounded-2xl shadow-lg p-6 flex-1 overflow-hidden flex flex-col max-h-[550px]">
                         <h3 className="text-sm uppercase tracking-wider text-gray-500 font-bold mb-4">Participantes ({participants.length})</h3>
                         <div className="overflow-y-auto flex-1 pr-2 space-y-2 custom-scrollbar">
                             {participants.map((p: any, idx: any) => (

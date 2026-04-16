@@ -356,12 +356,12 @@ const History = ({ onUpdate }: any) => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
-                            {history.map((test: any, index: any) => {
-                                const isVisibleOnPage = index >= startIndex && index < endIndex;
+                            {history.slice(startIndex, endIndex).map((test: any, index: any) => {
+                                const absoluteIndex = startIndex + index;
                                 return (
-                                    <tr key={test.id} className={`hover:bg-gray-50 ${!isVisibleOnPage ? 'print-only' : ''}`}>
+                                    <tr key={test.id} className="hover:bg-gray-50">
                                         <td className="px-4 py-2 text-sm text-gray-400 font-bold">
-                                            {index + 1}
+                                            {absoluteIndex + 1}
                                         </td>
                                         <td className="px-4 py-2 text-sm text-gray-600 whitespace-nowrap">
                                             {new Date(test.fecha_hora_1).toLocaleDateString()} {new Date(test.fecha_hora_1).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

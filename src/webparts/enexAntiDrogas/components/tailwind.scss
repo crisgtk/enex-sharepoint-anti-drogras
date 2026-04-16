@@ -17,4 +17,33 @@
         width: 100% !important;
         max-width: none !important;
     }
+
+    @media screen {
+        .print-only {
+            display: none !important;
+        }
+    }
+
+    @media print {
+        .no-print {
+            display: none !important;
+        }
+
+        .print-only {
+            display: block !important;
+        }
+
+        tr.print-only {
+            display: table-row !important;
+        }
+
+        body {
+            background-color: white !important;
+        }
+
+        .enex-app-container {
+            background-color: white !important;
+            padding: 0 !important;
+        }
+    }
 }

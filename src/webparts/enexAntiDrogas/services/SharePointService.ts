@@ -263,14 +263,14 @@ export class SharePointService {
 
             // Also check if user is Planta and Enex, and if so, insert them into Roulette if they don't exist
             if (
-                data.categoria_persona?.toLowerCase() === 'planta' && 
+                data.categoria_persona?.toLowerCase() === 'planta' &&
                 data.empresa?.toLowerCase() === 'enex' &&
                 data.rut
             ) {
                 try {
                     const existingInRoulette = await this.sp.web.lists.getByTitle("EnexRouletteUsers").items
                         .filter(`Rut eq '${data.rut}'`)();
-                        
+
                     if (existingInRoulette.length === 0) {
                         await this.sp.web.lists.getByTitle("EnexRouletteUsers").items.add({
                             Title: String(data.nombre || "Sin Nombre"),
@@ -297,7 +297,8 @@ export class SharePointService {
     public async getPending(): Promise<any[]> {
         // According to user requirements: Tests that are positive in sample 1 but have no sample 2 yet.
         const items = await this.sp.web.lists.getByTitle("EnexTestHistory").items
-            .filter("(Resultado1 eq '1' or Resultado1 eq 'true') and (Resultado2 eq '' or Resultado2 eq null)")();
+            .filter("(Resultado1 eq '1' or Resultado1 eq 'true') and (Resultado2 eq '' or Resultado2 eq null)")
+            .top(5000)();
 
         return items.map(i => ({
             ...i,
@@ -328,7 +329,8 @@ export class SharePointService {
 
             const tests = await this.sp.web.lists.getByTitle("EnexTestHistory").items
                 .filter(`TipoTest eq 'alcohol' and Fecha ge '${startDate}' and Fecha lt '${endDate}'`)
-                .select("Rut")();
+                .select("Rut")
+                .top(5000)();
 
             const clean = (r: string) => (r || '').replace(/[^0-9kK]/g, '').toLowerCase();
             const testedRuts = new Set(tests.map(t => clean(t.Rut)));
@@ -407,7 +409,7 @@ export class SharePointService {
             const items = await list.items
                 .filter(filterString)
                 .orderBy("Fecha", false)
-                .top(500)();
+                .top(5000)();
 
             console.log(`Found ${items.length} history items.`);
 
@@ -471,7 +473,7 @@ export class SharePointService {
     }
 
     public async getRouletteUsers(): Promise<any[]> {
-        const items = await this.sp.web.lists.getByTitle("EnexRouletteUsers").items();
+        const items = await this.sp.web.lists.getByTitle("EnexRouletteUsers").items.top(5000)();
         return items.map(i => ({
             ...i,
             id: i.Id,
