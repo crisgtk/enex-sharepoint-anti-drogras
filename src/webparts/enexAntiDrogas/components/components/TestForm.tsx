@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, FileText, CheckCircle, XCircle, Search } from 'lucide-react';
+import { User, FileText, CheckCircle, XCircle, Search, AlertTriangle } from 'lucide-react';
 import Combobox from './Combobox';
 
 const formatRut = (rut) => {
@@ -29,7 +29,12 @@ export const TEST_OPERATORS = [
     "HERNAN FELIPE MARIN LATORRE",
     "SARA CAMILA MARTINEZ BAEZA",
     "CRISTIAN ANTONIO VASQUEZ ARAUNA",
-    "MARIELA MUNOZ SEPULVEDA"
+    "MARIELA MUNOZ SEPULVEDA",
+    "RUBEN VALENZUELA GONZALEZ",
+    "CRISTIAN LABRA BELLO",
+    "CARLOS MARTÍNEZ RIVAS",
+    "PAMELA BASTIAS GODOY",
+    "CRISTIAN CARRASCO CARRASCO"
 ];
 
 const TestForm = ({ tipoTest, onSubmit, initialData = null as any, isEdit = false }: any) => {
@@ -39,7 +44,11 @@ const TestForm = ({ tipoTest, onSubmit, initialData = null as any, isEdit = fals
     const [formData, setFormData] = useState({
         rut: initialData?.rut || '',
         categoria_persona: (initialData?.categoria_persona === 'Planta vinculada a empresa ENEX' ? 'Planta' : initialData?.categoria_persona) || 'Planta',
-        empresa: initialData?.empresa || ((!initialData || initialData.categoria_persona === 'Planta' || initialData.categoria_persona === 'Planta vinculada a empresa ENEX') ? 'Enex' : ''),
+        empresa: initialData?.empresa || (
+            (!initialData || initialData.categoria_persona === 'Planta' || initialData.categoria_persona === 'Planta vinculada a empresa ENEX') 
+                ? 'Enex' 
+                : (initialData.categoria_persona === 'Planta Lautaro' ? 'Enex Lautaro' : '')
+        ),
         cargo: initialData?.cargo || '',
         nombre: initialData?.nombre || '',
         numero_maquina: initialData?.numero_maquina || '',
@@ -65,7 +74,9 @@ const TestForm = ({ tipoTest, onSubmit, initialData = null as any, isEdit = fals
                     rut: formatted,
                     nombre: subject.nombre,
                     categoria_persona: subject.categoria_persona === 'Planta vinculada a empresa ENEX' ? 'Planta' : subject.categoria_persona,
-                    empresa: (subject.categoria_persona === 'Planta vinculada a empresa ENEX' || subject.categoria_persona === 'Planta') ? 'Enex' : (subject.empresa || ''),
+                    empresa: (subject.categoria_persona === 'Planta vinculada a empresa ENEX' || subject.categoria_persona === 'Planta') 
+                        ? 'Enex' 
+                        : (subject.categoria_persona === 'Planta Lautaro' ? 'Enex Lautaro' : (subject.empresa || '')),
                     cargo: subject.cargo || ''
                 }));
             } else {
@@ -103,14 +114,14 @@ const TestForm = ({ tipoTest, onSubmit, initialData = null as any, isEdit = fals
         onSubmit(submissionData);
 
         // Reset form
-        setFormData({ 
-            ...formData, 
-            rut: '', 
-            nombre: '', 
-            numero_maquina: '', 
-            serial_equipo: '', 
-            empresa: formData.categoria_persona === 'Planta' ? 'Enex' : '', 
-            cargo: '' 
+        setFormData({
+            ...formData,
+            rut: '',
+            nombre: '',
+            numero_maquina: '',
+            serial_equipo: '',
+            empresa: formData.categoria_persona === 'Planta' ? 'Enex' : (formData.categoria_persona === 'Planta Lautaro' ? 'Enex Lautaro' : ''),
+            cargo: ''
         });
         setResultado(null);
         setResultado2(null);
@@ -125,7 +136,7 @@ const TestForm = ({ tipoTest, onSubmit, initialData = null as any, isEdit = fals
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-4 z-20 relative">
-                    <label className="block text-sm font-bold text-gray-700 mb-1">Responsable de la Toma (Operador)</label>
+                    <label className="block text-sm font-bold text-gray-700 mb-1">Responsable de la Toma</label>
                     <div className="flex gap-2">
                         <div className="relative flex-1">
                             <User className="absolute left-3 top-2.5 text-gray-400 z-10" size={20} />
@@ -236,12 +247,13 @@ const TestForm = ({ tipoTest, onSubmit, initialData = null as any, isEdit = fals
                                 setFormData(prev => ({
                                     ...prev,
                                     categoria_persona: cat,
-                                    empresa: cat === 'Planta' ? 'Enex' : ''
+                                    empresa: cat === 'Planta' ? 'Enex' : (cat === 'Planta Lautaro' ? 'Enex Lautaro' : '')
                                 }));
                             }}
                             className="block w-full rounded-md border-gray-300 shadow-sm focus:border-enex-blue focus:ring-enex-blue border p-2"
                         >
                             <option value="Planta">Planta</option>
+                            <option value="Planta Lautaro">Planta Lautaro</option>
                             <option value="Transportista">Transportista</option>
                             <option value="Externo">Externo</option>
                         </select>
@@ -253,10 +265,9 @@ const TestForm = ({ tipoTest, onSubmit, initialData = null as any, isEdit = fals
                             type="text"
                             value={formData.empresa || ''}
                             onChange={(e) => setFormData({ ...formData, empresa: e.target.value })}
-                            readOnly={formData.categoria_persona === 'Planta'}
-                            className={`block w-full rounded-md border-gray-300 shadow-sm focus:border-enex-blue focus:ring-enex-blue border p-2 ${
-                                formData.categoria_persona === 'Planta' ? 'bg-gray-100 cursor-not-allowed text-gray-500 font-semibold text-opacity-80' : ''
-                            }`}
+                            readOnly={formData.categoria_persona === 'Planta' || formData.categoria_persona === 'Planta Lautaro'}
+                            className={`block w-full rounded-md border-gray-300 shadow-sm focus:border-enex-blue focus:ring-enex-blue border p-2 ${ (formData.categoria_persona === 'Planta' || formData.categoria_persona === 'Planta Lautaro') ? 'bg-gray-100 cursor-not-allowed text-gray-500 font-semibold text-opacity-80' : ''
+                                }`}
                             placeholder="Nombre Empresa"
                         />
                     </div>
@@ -282,10 +293,10 @@ const TestForm = ({ tipoTest, onSubmit, initialData = null as any, isEdit = fals
                             onClick={() => setResultado(0)}
                             className={`flex-1 p-6 rounded-xl border-2 flex flex-col items-center gap-2 transition-all
                         ${resultado === 0
-                                    ? 'border-enex-green bg-green-50 text-enex-green shadow-lg ring-2 ring-enex-green ring-opacity-50'
-                                    : 'border-gray-200 hover:border-enex-green text-gray-500 hover:bg-green-50'}`}
+                                    ? 'border-red-600 bg-red-50 text-red-700 shadow-lg ring-2 ring-red-600 ring-opacity-50'
+                                    : 'border-gray-200 hover:border-red-600 text-gray-500 hover:bg-red-50'}`}
                         >
-                            <CheckCircle size={32} />
+                            <XCircle size={32} />
                             <span className="text-xl font-bold">NEGATIVO</span>
                         </button>
 
@@ -294,11 +305,23 @@ const TestForm = ({ tipoTest, onSubmit, initialData = null as any, isEdit = fals
                             onClick={() => setResultado(1)}
                             className={`flex-1 p-6 rounded-xl border-2 flex flex-col items-center gap-2 transition-all
                         ${resultado === 1
-                                    ? 'border-red-600 bg-red-50 text-red-700 shadow-lg ring-2 ring-red-600 ring-opacity-50'
-                                    : 'border-gray-200 hover:border-red-600 text-gray-500 hover:bg-red-50'}`}
+                                    ? 'border-enex-green bg-green-50 text-enex-green shadow-lg ring-2 ring-enex-green ring-opacity-50'
+                                    : 'border-gray-200 hover:border-enex-green text-gray-500 hover:bg-green-50'}`}
                         >
-                            <XCircle size={32} />
+                            <CheckCircle size={32} />
                             <span className="text-xl font-bold">POSITIVO</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => setResultado(2)}
+                            className={`flex-1 p-6 rounded-xl border-2 flex flex-col items-center gap-2 transition-all
+                        ${resultado === 2
+                                    ? 'border-amber-500 bg-amber-50 text-amber-600 shadow-lg ring-2 ring-amber-500 ring-opacity-50'
+                                    : 'border-gray-200 hover:border-amber-500 text-gray-500 hover:bg-amber-50'}`}
+                        >
+                            <AlertTriangle size={32} />
+                            <span className="text-xl font-bold">NO CONCLUYENTE</span>
                         </button>
                     </div>
                 </div>
@@ -311,25 +334,37 @@ const TestForm = ({ tipoTest, onSubmit, initialData = null as any, isEdit = fals
                             <button
                                 type="button"
                                 onClick={() => setResultado2(0)}
-                                className={`flex-1 p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all
+                                className={`flex-1 p-6 rounded-xl border-2 flex flex-col items-center gap-2 transition-all
                             ${resultado2 === 0
-                                        ? 'border-enex-green bg-green-50 text-enex-green shadow-lg ring-2 ring-enex-green ring-opacity-50'
-                                        : 'border-gray-200 hover:border-enex-green text-gray-500 hover:bg-green-50'}`}
+                                        ? 'border-red-600 bg-red-50 text-red-700 shadow-lg ring-2 ring-red-600 ring-opacity-50'
+                                        : 'border-gray-200 hover:border-red-600 text-gray-500 hover:bg-red-50'}`}
                             >
-                                <CheckCircle size={24} />
-                                <span className="font-bold">NEGATIVO</span>
+                                <XCircle size={32} />
+                                <span className="text-xl font-bold">NEGATIVO</span>
                             </button>
 
                             <button
                                 type="button"
                                 onClick={() => setResultado2(1)}
-                                className={`flex-1 p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all
+                                className={`flex-1 p-6 rounded-xl border-2 flex flex-col items-center gap-2 transition-all
                             ${resultado2 === 1
-                                        ? 'border-red-600 bg-red-50 text-red-700 shadow-lg ring-2 ring-red-600 ring-opacity-50'
-                                        : 'border-gray-200 hover:border-red-600 text-gray-500 hover:bg-red-50'}`}
+                                        ? 'border-enex-green bg-green-50 text-enex-green shadow-lg ring-2 ring-enex-green ring-opacity-50'
+                                        : 'border-gray-200 hover:border-enex-green text-gray-500 hover:bg-green-50'}`}
                             >
-                                <XCircle size={24} />
-                                <span className="font-bold">POSITIVO</span>
+                                <CheckCircle size={32} />
+                                <span className="text-xl font-bold">POSITIVO</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => setResultado2(2)}
+                                className={`flex-1 p-6 rounded-xl border-2 flex flex-col items-center gap-2 transition-all
+                            ${resultado2 === 2
+                                        ? 'border-amber-500 bg-amber-50 text-amber-600 shadow-lg ring-2 ring-amber-500 ring-opacity-50'
+                                        : 'border-gray-200 hover:border-amber-500 text-gray-500 hover:bg-amber-50'}`}
+                            >
+                                <AlertTriangle size={32} />
+                                <span className="text-xl font-bold">NO CONCLUYENTE</span>
                             </button>
                         </div>
                     </div>

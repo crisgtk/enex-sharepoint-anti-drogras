@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { FileText, Database, Printer, FileDown, Edit, X } from 'lucide-react';
+import { FileText, Database, FileDown, Edit, X, CheckCircle, AlertTriangle } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import TestForm, { TEST_OPERATORS } from './TestForm';
 import Combobox from './Combobox';
+
+const logo: any = require('../../assets/enex-logo.png');
 
 const displayCategory = (cat: any) => cat === 'Planta vinculada a empresa ENEX' ? 'Planta' : cat;
 
@@ -101,40 +103,53 @@ const History = ({ onUpdate }: any) => {
     const generatePDF = (test: any) => {
         const doc = new jsPDF();
 
+        // Add Logo
+        doc.addImage(logo, 'PNG', 15, 12, 30, 12);
+
         doc.setFontSize(22);
-        doc.text("Certificado de Control", 105, 20, { align: "center" } as any);
+        doc.text("Certificado de Control", 105, 35, { align: "center" } as any);
 
         doc.setFontSize(16);
-        doc.text(`Enex - Planta San Vicente`, 105, 30, { align: "center" } as any);
+        doc.text(`Enex - Planta San Vicente`, 105, 45, { align: "center" } as any);
 
         doc.setFontSize(12);
-        doc.text(`Fecha: ${new Date(test.fecha_hora_1).toLocaleDateString()}`, 20, 50);
-        doc.text(`Hora: ${new Date(test.fecha_hora_1).toLocaleTimeString()}`, 150, 50);
+        doc.text(`Fecha: ${new Date(test.fecha_hora_1).toLocaleDateString()}`, 20, 65);
+        doc.text(`Hora: ${new Date(test.fecha_hora_1).toLocaleTimeString()}`, 150, 65);
 
         doc.setLineWidth(0.5);
-        doc.line(20, 55, 190, 55);
+        doc.line(20, 70, 190, 70);
 
-        doc.text("Detalles del Colaborador:", 20, 65);
-        doc.text(`Nombre: ${test.nombre}`, 30, 75);
-        doc.text(`RUT: ${test.rut}`, 30, 85);
-        doc.text(`Cargo: ${test.cargo || 'N/A'}`, 30, 95);
-        doc.text(`Categoría: ${displayCategory(test.categoria_persona)}`, 30, 105);
-        doc.text(`Empresa: ${test.empresa || 'N/A'}`, 30, 115);
-        if (test.numero_maquina) doc.text(`Patente: ${test.numero_maquina}`, 30, 125);
+        doc.text("Detalles del Colaborador:", 20, 80);
+        doc.text(`Nombre: ${test.nombre}`, 30, 90);
+        doc.text(`RUT: ${test.rut}`, 30, 100);
+        doc.text(`Cargo: ${test.cargo || 'N/A'}`, 30, 110);
+        doc.text(`Categoría: ${displayCategory(test.categoria_persona)}`, 30, 120);
+        doc.text(`Empresa: ${test.empresa || 'N/A'}`, 30, 130);
+        if (test.numero_maquina) doc.text(`Patente: ${test.numero_maquina}`, 30, 140);
 
-        doc.text("Detalles del Test:", 20, 140);
-        doc.text(`N° de Test: ${test.serial_equipo || 'N/A'}`, 30, 150);
-        doc.text(`Tipo: ${test.tipo_test.toUpperCase()}`, 30, 160);
-        doc.text(`Resultado Muestra 1: ${test.resultado_1 ? 'POSITIVO' : 'NEGATIVO'}  (${new Date(test.fecha_hora_1).toLocaleString()})`, 30, 170);
+        doc.text("Detalles del Test:", 20, 155);
+        doc.text(`N° de Test: ${test.serial_equipo || 'N/A'}`, 30, 165);
+        doc.text(`Tipo: ${test.tipo_test.toUpperCase()}`, 30, 175);
+        const getResStr = (val: any) => (val === 1 || val === '1' || val === true) ? 'POSITIVO' : (val === 2 || val === '2') ? 'NO CONCLUYENTE' : 'NEGATIVO';
+        const res1 = getResStr(test.resultado_1);
+        doc.text(`Resultado Muestra 1: ${res1}  (${new Date(test.fecha_hora_1).toLocaleString()})`, 30, 185);
 
         if (test.fecha_hora_2) {
-            doc.text(`Resultado Muestra 2: ${test.resultado_2 ? 'POSITIVO' : 'NEGATIVO'}  (${new Date(test.fecha_hora_2).toLocaleString()})`, 30, 180);
-            const final = (test.resultado_1 && test.resultado_2) ? 'POSITIVO CONFIRMADO' : 'NEGATIVO/NO CONCLUYENTE';
+            const res2 = getResStr(test.resultado_2);
+            doc.text(`Resultado Muestra 2: ${res2}  (${new Date(test.fecha_hora_2).toLocaleString()})`, 30, 195);
             doc.setFont('helvetica', 'bold');
-            doc.text(`Estado Final: ${final}`, 30, 195);
+            doc.text(`Estado Final: FINALIZADO`, 30, 210);
             doc.setFont('helvetica', 'normal');
         } else {
-            doc.text(`Estado: PENDIENTE SEGUNDA MUESTRA`, 30, 180);
+            if (test.resultado_1 === 0 || test.resultado_1 === '0' || test.resultado_1 === false) {
+                doc.setFont('helvetica', 'bold');
+                doc.text(`Estado Final: FINALIZADO`, 30, 195);
+                doc.setFont('helvetica', 'normal');
+            } else {
+                doc.setFont('helvetica', 'bold');
+                doc.text(`Estado Final: PENDIENTE SEGUNDA MUESTRA`, 30, 195);
+                doc.setFont('helvetica', 'normal');
+            }
         }
 
         // Signatures
@@ -166,28 +181,51 @@ const History = ({ onUpdate }: any) => {
 
     const generateHistoryReport = () => {
         const doc = new jsPDF('l', 'mm', 'a4'); // Landscape for better fit
-        doc.setFontSize(18);
-        doc.text("Reporte de Controles de Alcohol y Drogas - Enex San Vicente", 14, 15);
-        doc.setFontSize(10);
-        doc.text(`Generado el: ${new Date().toLocaleString()}`, 14, 22);
 
-        const tableData = history.map((test: any) => [
-            new Date(test.fecha_hora_1).toLocaleDateString() + ' ' + new Date(test.fecha_hora_1).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            test.nombre,
-            test.rut,
-            test.cargo || '-',
-            displayCategory(test.categoria_persona),
-            test.empresa || '-',
-            test.serial_equipo || '-',
-            test.tipo_test.toUpperCase(),
-            test.resultado_1 ? 'POSITIVO' : 'NEGATIVO',
-            test.fecha_hora_2 ? (test.resultado_2 ? 'POSITIVO' : 'NEGATIVO') : '-'
-        ]);
+        // Add Logo
+        doc.addImage(logo, 'PNG', 14, 10, 25, 10);
+
+        doc.setFontSize(18);
+        doc.text("Reporte de Controles de Alcohol y Drogas - Enex San Vicente", 14, 30);
+        doc.setFontSize(10);
+        doc.text(`Generado el: ${new Date().toLocaleString()}`, 14, 37);
+
+        const tableData = history.map((test: any) => {
+            const getShortRes = (val: any) => (val === 1 || val === '1' || val === true) ? 'POSITIVO' : (val === 2 || val === '2') ? 'NO CONCL.' : 'NEGATIVO';
+            const res1 = getShortRes(test.resultado_1);
+            let res2 = '-';
+            let status = '';
+
+            if (test.fecha_hora_2) {
+                res2 = getShortRes(test.resultado_2);
+                status = 'FINALIZADO';
+            } else {
+                if (test.resultado_1 === 0 || test.resultado_1 === '0' || test.resultado_1 === false) {
+                    status = 'FINALIZADO';
+                } else {
+                    status = 'PEND. 2DA MUESTRA';
+                }
+            }
+
+            return [
+                new Date(test.fecha_hora_1).toLocaleDateString() + ' ' + new Date(test.fecha_hora_1).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                test.nombre,
+                test.rut,
+                test.cargo || '-',
+                displayCategory(test.categoria_persona),
+                test.empresa || '-',
+                test.serial_equipo || '-',
+                test.tipo_test.toUpperCase(),
+                res1,
+                res2,
+                status
+            ];
+        });
 
         autoTable(doc, {
-            head: [['Fecha/Hora', 'Nombre', 'RUT', 'Cargo', 'Cat.', 'Empresa', 'N° Test', 'Tipo', 'Res. 1', 'Res. 2']],
+            head: [['Fecha/Hora', 'Nombre', 'RUT', 'Cargo', 'Cat.', 'Empresa', 'N° Test', 'Tipo', 'Res. 1', 'Res. 2', 'Estado']],
             body: tableData,
-            startY: 25,
+            startY: 42,
             theme: 'striped',
             headStyles: { fillColor: [0, 51, 161] }, // Enex Blue
             styles: { fontSize: 8 }
@@ -196,22 +234,14 @@ const History = ({ onUpdate }: any) => {
         doc.save(`reporte_enex_${new Date().toISOString().split('T')[0]}.pdf`);
     };
 
-    const handlePrint = () => {
-        window.print();
-    };
+
 
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center no-print">
                 <h2 className="text-2xl font-bold text-enex-blue">Historial de Registros</h2>
                 <div className="flex gap-2">
-                    <button
-                        onClick={handlePrint}
-                        className="flex items-center gap-2 bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 shadow-md transition-colors"
-                        title="Imprimir vista actual"
-                    >
-                        <Printer size={16} /> Imprimir
-                    </button>
+
                     <button
                         onClick={generateHistoryReport}
                         className="flex items-center gap-2 bg-green-700 text-white px-4 py-2 rounded hover:bg-green-800 shadow-md transition-colors"
@@ -231,6 +261,9 @@ const History = ({ onUpdate }: any) => {
 
             {/* Print Header (Only visible when printing) */}
             <div className="print-only mb-8">
+                <div className="flex justify-start mb-6">
+                    <img src={logo} style={{ height: '45px', objectFit: 'contain' }} alt="Enex Logo" />
+                </div>
                 <h1 className="text-2xl font-bold text-center">Reporte de Controles - Enex San Vicente</h1>
                 <p className="text-center text-sm text-gray-500">Documento interno de control de alcohol y drogas</p>
                 <div className="mt-4 border-b pb-2 flex justify-between text-xs">
@@ -327,6 +360,7 @@ const History = ({ onUpdate }: any) => {
                         <option value="all">Todos</option>
                         <option value="0">Negativo</option>
                         <option value="1">Positivo</option>
+                        <option value="2">No concluyente</option>
                     </select>
                 </div>
             </div>
@@ -352,6 +386,7 @@ const History = ({ onUpdate }: any) => {
                                 <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">N° Test</th>
                                 <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tipo</th>
                                 <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Resultado</th>
+                                <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
                                 <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider no-print">Acciones</th>
                             </tr>
                         </thead>
@@ -375,20 +410,31 @@ const History = ({ onUpdate }: any) => {
                                         <td className="px-4 py-2 text-sm text-gray-600 capitalize">{test.tipo_test}</td>
                                         <td className="px-4 py-2 text-sm">
                                             <div className="flex items-center gap-1">
-                                                <span className={`w-3 h-3 rounded-full ${test.resultado_1 ? 'bg-red-600' : 'bg-green-600'}`}></span>
-                                                <span>{test.resultado_1 ? 'Pos' : 'Neg'}</span>
+                                                <span
+                                                    className={`w-3 h-3 rounded-full ${test.resultado_1 === 1 || test.resultado_1 === '1' || test.resultado_1 === true ? 'bg-red-600' : test.resultado_1 === 2 || test.resultado_1 === '2' ? 'bg-amber-500' : 'bg-green-600'}`}
+                                                ></span>
+                                                <span>{test.resultado_1 === 1 || test.resultado_1 === '1' || test.resultado_1 === true ? 'Pos' : test.resultado_1 === 2 || test.resultado_1 === '2' ? 'No Concl.' : 'Neg'}</span>
                                                 <span className="text-xs text-gray-500 whitespace-nowrap">
-                                                    ({new Date(test.fecha_hora_1).toLocaleString()})
+                                                    ({new Date(test.fecha_hora_1).toLocaleDateString()})
                                                 </span>
                                             </div>
                                             {test.fecha_hora_2 && (
                                                 <div className="flex items-center gap-1 mt-1">
-                                                    <span className={`w-3 h-3 rounded-full ${test.resultado_2 ? 'bg-red-600' : 'bg-green-600'}`}></span>
-                                                    <span>{test.resultado_2 ? 'Pos' : 'Neg'}</span>
+                                                    <span
+                                                        className={`w-3 h-3 rounded-full ${test.resultado_2 === 1 || test.resultado_2 === '1' || test.resultado_2 === true ? 'bg-red-600' : test.resultado_2 === 2 || test.resultado_2 === '2' ? 'bg-amber-500' : 'bg-green-600'}`}
+                                                    ></span>
+                                                    <span>{test.resultado_2 === 1 || test.resultado_2 === '1' || test.resultado_2 === true ? 'Pos' : test.resultado_2 === 2 || test.resultado_2 === '2' ? 'No Concl.' : 'Neg'}</span>
                                                     <span className="text-xs text-gray-500 whitespace-nowrap">
-                                                        ({new Date(test.fecha_hora_2).toLocaleString()})
+                                                        ({new Date(test.fecha_hora_2).toLocaleDateString()})
                                                     </span>
                                                 </div>
+                                            )}
+                                        </td>
+                                        <td className="px-4 py-2 text-sm font-medium">
+                                            {test.fecha_hora_2 || test.resultado_1 === 0 || test.resultado_1 === '0' || test.resultado_1 === false ? (
+                                                <span className="text-enex-green flex items-center gap-1.5"><CheckCircle className="w-4 h-4" /> Finalizado</span>
+                                            ) : (
+                                                <span className="flex items-center gap-1.5 text-amber-500"><AlertTriangle className="w-4 h-4" /> Pendiente 2da Muestra</span>
                                             )}
                                         </td>
                                         <td className="px-4 py-2 text-sm no-print">

@@ -18,7 +18,7 @@ const PendingList = ({ onUpdate }: any) => {
     }, []);
 
     const handleComplete = async (id: any, resultado2: any) => {
-        if (confirm(`¿Confirmar resultado de segunda muestra: ${resultado2 ? 'POSITIVO' : 'NEGATIVO'}?`)) {
+        if (confirm(`¿Confirmar resultado de segunda muestra: ${resultado2 === 1 ? 'POSITIVO' : resultado2 === 2 ? 'NO CONCLUYENTE' : 'NEGATIVO'}?`)) {
             await window.api.updateTestResult2({ id, resultado_2: resultado2 });
             loadPendientes();
             if (onUpdate) onUpdate();
@@ -28,7 +28,7 @@ const PendingList = ({ onUpdate }: any) => {
     return (
         <div className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-enex-blue">
-                <AlertTriangle className="text-orange-500" />
+                <AlertTriangle className="text-amber-500" />
                 Tests Pendientes (Segunda Muestra Requerida)
             </h2>
 
@@ -57,8 +57,8 @@ const PendingList = ({ onUpdate }: any) => {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{test.rut}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">{test.tipo_test}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${test.resultado_1 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
-                                            {test.resultado_1 ? 'Positivo' : 'Negativo'}
+                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${test.resultado_1 === 1 || test.resultado_1 === '1' || test.resultado_1 === true ? 'bg-red-100 text-red-800' : test.resultado_1 === 2 || test.resultado_1 === '2' ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'}`}>
+                                            {test.resultado_1 === 1 || test.resultado_1 === '1' || test.resultado_1 === true ? 'Positivo' : test.resultado_1 === 2 || test.resultado_1 === '2' ? 'No Concluyente' : 'Negativo'}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex gap-2">
@@ -73,6 +73,12 @@ const PendingList = ({ onUpdate }: any) => {
                                             className="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded text-xs flex items-center gap-1 shadow-md transition-all hover:scale-105 active:scale-95 hover:shadow-lg"
                                         >
                                             <X size={14} /> Positivo
+                                        </button>
+                                        <button
+                                            onClick={() => handleComplete(test.id, 2)}
+                                            className="bg-amber-500 hover:bg-amber-600 text-white font-bold py-1.5 px-3 rounded text-xs flex items-center gap-1 shadow-md transition-all hover:scale-105 active:scale-95 hover:shadow-lg"
+                                        >
+                                            <AlertTriangle size={14} /> No Concl.
                                         </button>
                                     </td>
                                 </tr>

@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Search, Printer, FileDown, TestTube } from 'lucide-react';
+import { Search, FileDown, TestTube } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+
+const logo: any = require('../../assets/enex-logo.png');
 
 const displayCategory = (cat: any) => cat === 'Planta vinculada a empresa ENEX' ? 'Planta' : cat;
 
@@ -69,7 +71,7 @@ const PendingMonthly = ({ onTakeTest, onUpdateCount }: any) => {
 
         const matchName = nombre.toLowerCase().indexOf(filters.searchName.toLowerCase()) !== -1;
         const matchRut = cleanRut(rut).indexOf(cleanRut(filters.searchRut)) !== -1;
-        const matchEmpresa = filters.searchEmpresa === '' || filters.searchEmpresa === 'all' || empresa.toLowerCase().indexOf(filters.searchEmpresa.toLowerCase()) !== -1;
+        const matchEmpresa = filters.searchEmpresa === '' || filters.searchEmpresa === 'all' || empresa.toLowerCase() === filters.searchEmpresa.toLowerCase();
         return matchName && matchRut && matchEmpresa;
     });
 
@@ -85,17 +87,18 @@ const PendingMonthly = ({ onTakeTest, onUpdateCount }: any) => {
         }
     };
 
-    const handlePrint = () => {
-        window.print();
-    };
+
 
     const generatePDF = () => {
         const doc = new jsPDF();
 
+        // Add Logo
+        doc.addImage(logo, 'PNG', 14, 10, 30, 12);
+
         doc.setFontSize(18);
-        doc.text("Pendientes Test Alcohol Mensual", 14, 15);
+        doc.text("Pendientes Test Alcohol Mensual", 14, 30);
         doc.setFontSize(10);
-        doc.text(`Generado el: ${new Date().toLocaleString()}`, 14, 22);
+        doc.text(`Generado el: ${new Date().toLocaleString()}`, 14, 37);
 
         const tableData = filteredList.map((item: any, index: any) => [
             index + 1,
@@ -109,7 +112,7 @@ const PendingMonthly = ({ onTakeTest, onUpdateCount }: any) => {
         autoTable(doc, {
             head: [['#', 'Nombre', 'RUT', 'Categoría', 'Empresa', 'Cargo']],
             body: tableData,
-            startY: 25,
+            startY: 42,
             theme: 'striped',
             headStyles: { fillColor: [0, 51, 161] },
             styles: { fontSize: 9 }
@@ -128,12 +131,7 @@ const PendingMonthly = ({ onTakeTest, onUpdateCount }: any) => {
                     </span>
                 </h2>
                 <div className="flex gap-2">
-                    <button
-                        onClick={handlePrint}
-                        className="flex items-center gap-2 bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 shadow-md transition-colors"
-                    >
-                        <Printer size={16} /> Imprimir
-                    </button>
+
                     <button
                         onClick={generatePDF}
                         className="flex items-center gap-2 bg-green-700 text-white px-4 py-2 rounded hover:bg-green-800 shadow-md transition-colors"
@@ -152,6 +150,9 @@ const PendingMonthly = ({ onTakeTest, onUpdateCount }: any) => {
 
             {/* Print Header */}
             <div className="print-only mb-8">
+                <div className="flex justify-start mb-6">
+                    <img src={logo} style={{ height: '45px', objectFit: 'contain' }} alt="Enex Logo" />
+                </div>
                 <h1 className="text-2xl font-bold text-center">Listado Pendientes Test Alcohol - {new Date().toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}</h1>
                 <p className="text-center text-sm text-gray-500">Enex Planta San Vicente</p>
                 <div className="mt-4 border-b pb-2 flex justify-between text-xs">

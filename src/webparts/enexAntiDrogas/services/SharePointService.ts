@@ -235,8 +235,8 @@ export class SharePointService {
                 Empresa: String(data.empresa || ""),
                 CategoriaPersona: String(data.categoria_persona || ""),
                 Cargo: String(data.cargo || ""),
-                Resultado1: String(data.resultado_1 !== undefined ? (data.resultado_1 === 1 || data.resultado_1 === true ? "1" : "0") : ""),
-                Resultado2: String(data.resultado_2 !== undefined ? (data.resultado_2 === 1 || data.resultado_2 === true ? "1" : "0") : ""),
+                Resultado1: String(data.resultado_1 !== undefined ? (data.resultado_1 === 1 || data.resultado_1 === "1" || data.resultado_1 === true ? "1" : (data.resultado_1 === 2 || data.resultado_1 === "2" ? "2" : "0")) : ""),
+                Resultado2: String(data.resultado_2 !== undefined ? (data.resultado_2 === 1 || data.resultado_2 === "1" || data.resultado_2 === true ? "1" : (data.resultado_2 === 2 || data.resultado_2 === "2" ? "2" : "0")) : ""),
                 TipoTest: String(data.tipo_test || ""),
                 NumeroMaquina: String(data.numero_maquina || ""),
                 SerialEquipo: String(data.serial_equipo || ""),
@@ -297,7 +297,7 @@ export class SharePointService {
     public async getPending(): Promise<any[]> {
         // According to user requirements: Tests that are positive in sample 1 but have no sample 2 yet.
         const items = await this.sp.web.lists.getByTitle("EnexTestHistory").items
-            .filter("(Resultado1 eq '1' or Resultado1 eq 'true') and (Resultado2 eq '' or Resultado2 eq null)")
+            .filter("(Resultado1 eq '1' or Resultado1 eq 'true' or Resultado1 eq '2') and (Resultado2 eq '' or Resultado2 eq null)")
             .top(5000)();
 
         return items.map(i => ({
@@ -309,7 +309,7 @@ export class SharePointService {
             categoria_persona: i.CategoriaPersona,
             cargo: i.Cargo,
             tipo_test: i.TipoTest,
-            resultado_1: i.Resultado1 === "1" || i.Resultado1 === "true",
+            resultado_1: i.Resultado1 === "1" || i.Resultado1 === "true" ? 1 : (i.Resultado1 === "2" ? 2 : 0),
             fecha_hora_1: i.Fecha
         }));
     }
@@ -357,8 +357,8 @@ export class SharePointService {
             const list = this.sp.web.lists.getByTitle("EnexTestHistory");
 
             // Base filter: Include all except those PENDING (Pos1 without Pos2)
-            // Logic: Show if (Sample 1 is NOT Positive) OR (Sample 2 is NOT Empty)
-            let conditions: string[] = ["((Resultado1 ne '1' and Resultado1 ne 'true') or (Resultado2 ne '' and Resultado2 ne null))"];
+            // Logic: Show if (Sample 1 is NOT Positive and NOT No Concluyente) OR (Sample 2 is NOT Empty)
+            let conditions: string[] = ["((Resultado1 ne '1' and Resultado1 ne 'true' and Resultado1 ne '2') or (Resultado2 ne '' and Resultado2 ne null))"];
 
             if (filters.searchRut) {
                 // Filter by exact RUT (formatted)
@@ -370,7 +370,7 @@ export class SharePointService {
             }
 
             if (filters.searchEmpresa && filters.searchEmpresa !== 'all' && filters.searchEmpresa.trim() !== "") {
-                conditions.push(`substringof('${filters.searchEmpresa}', Empresa)`);
+                conditions.push(`Empresa eq '${filters.searchEmpresa}'`);
             }
 
             if (filters.searchOperador && filters.searchOperador !== 'all' && filters.searchOperador.trim() !== "") {
@@ -388,6 +388,9 @@ export class SharePointService {
                 } else if (filters.result === '0') {
                     // Result 1 is negative
                     conditions.push("(Resultado1 eq '0' or Resultado1 eq 'false')");
+                } else if (filters.result === '2') {
+                    // Result 1 is no concluyente
+                    conditions.push("(Resultado1 eq '2')");
                 }
             }
 
@@ -421,8 +424,8 @@ export class SharePointService {
                 empresa: i.Empresa,
                 fecha_hora_1: i.Fecha,
                 fecha_hora_2: (i.Resultado2 && i.Resultado2 !== "") ? i.Fecha : null,
-                resultado_1: i.Resultado1 === "1" || i.Resultado1 === "true",
-                resultado_2: i.Resultado2 === "1" || i.Resultado2 === "true",
+                resultado_1: i.Resultado1 === "1" || i.Resultado1 === "true" ? 1 : (i.Resultado1 === "2" ? 2 : 0),
+                resultado_2: i.Resultado2 === "1" || i.Resultado2 === "true" ? 1 : (i.Resultado2 === "2" ? 2 : 0),
                 tipo_test: i.TipoTest,
                 categoria_persona: i.CategoriaPersona,
                 usuario_operador: i.UsuarioOperador,
@@ -445,8 +448,8 @@ export class SharePointService {
                 Empresa: String(data.empresa || ""),
                 CategoriaPersona: String(data.categoria_persona || ""),
                 Cargo: String(data.cargo || ""),
-                Resultado1: String(data.resultado_1 === 1 || data.resultado_1 === true ? "1" : "0"),
-                Resultado2: String(data.resultado_2 === 1 || data.resultado_2 === true ? "1" : "0"),
+                Resultado1: String(data.resultado_1 === 1 || data.resultado_1 === "1" || data.resultado_1 === true ? "1" : (data.resultado_1 === 2 || data.resultado_1 === "2" ? "2" : "0")),
+                Resultado2: String(data.resultado_2 === 1 || data.resultado_2 === "1" || data.resultado_2 === true ? "1" : (data.resultado_2 === 2 || data.resultado_2 === "2" ? "2" : "0")),
                 NumeroMaquina: String(data.numero_maquina || ""),
                 SerialEquipo: String(data.serial_equipo || ""),
                 Observaciones: data.observaciones || "",
@@ -462,7 +465,7 @@ export class SharePointService {
     public async updateTestResult2(data: any): Promise<any> {
         try {
             const result = await this.sp.web.lists.getByTitle("EnexTestHistory").items.getById(data.id).update({
-                Resultado2: String(data.resultado_2 === 1 || data.resultado_2 === true ? "1" : "0"),
+                Resultado2: String(data.resultado_2 === 1 || data.resultado_2 === "1" || data.resultado_2 === true ? "1" : (data.resultado_2 === 2 || data.resultado_2 === "2" ? "2" : "0")),
                 Fecha: new Date().toISOString()
             });
             return { changes: 1, ...result };
@@ -487,7 +490,7 @@ export class SharePointService {
 
     public async getCompanies(): Promise<string[]> {
         // Fixed list or from history
-        return ["Enex", "Trans-vanc", "Transportes CV", "M&M", "Copec", "Otros"];
+        return ["Enex", "Enex Lautaro", "Trans-vanc", "Transportes CV", "M&M", "Copec", "Otros"];
     }
 }
 
